@@ -7,17 +7,21 @@ ENV WEBUI_URL="https://llm.ax5glv.easypanel.host/"
 ENV WEBUI_SECRET_KEY="benemax_secret_key_change_me"
 ENV WEBUI_AUTH=True
 
-# Injeção de CSS para Fonte Poppins e Cores
+# Injeção de CSS para Fonte Poppins e Cores (Agressivo)
 ENV CUSTOM_INTERFACE_CSS=" \
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap'); \
-    body, html { font-family: 'Poppins', sans-serif !important; } \
+    * :not(.material-icons):not(.fa):not(.fab):not(.fas):not(.far) { font-family: 'Poppins', sans-serif !important; } \
     :root { --primary: #8B2CE5 !important; --accent: #00A3FF !important; } \
     .bg-primary { background: linear-gradient(135deg, #8B2CE5 0%, #00A3FF 100%) !important; border: none !important; } \
     "
 
-# Copiamos a logo para o container
+# Copiamos a logo para o local de build estático
 COPY logobenemax.png /app/build/favicon.png
 COPY logobenemax.png /app/build/logo.png
+
+# Informamos as URLs para o sistema reconhecer os arquivos locais
+ENV WEBUI_FAVICON_URL="/favicon.png"
+ENV WEBUI_LOGO_URL="/logo.png"
 
 # Configurações para otimizar o uso em CPU
 ENV OLLAMA_NUM_PARALLEL=1
