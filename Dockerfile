@@ -7,28 +7,33 @@ ENV WEBUI_URL="https://llm.ax5glv.easypanel.host/"
 ENV WEBUI_SECRET_KEY="benemax_secret_key_change_me"
 ENV WEBUI_AUTH=True
 
-# Injeção de CSS Agressiva via Variável
+# Injeção de CSS Agressiva
 ENV CUSTOM_INTERFACE_CSS=" \
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap'); \
     * { font-family: 'Poppins', sans-serif !important; } \
     :root { --primary: #8B2CE5 !important; --accent: #00A3FF !important; } \
-    .bg-primary { background: linear-gradient(135deg, #8B2CE5 0%, #00A3FF 100%) !important; border: none !important; } \
+    #side-panel-header, .app-title { font-size: 0 !important; } \
+    #side-panel-header::after, .app-title::after { content: 'BenemaxGPT' !important; font-size: 1rem !important; visibility: visible !important; } \
     "
 
-# Copiamos a logo
+# Copiamos a logo para TUDO que for ícone no sistema
 COPY logobenemax.png /app/build/favicon.png
 COPY logobenemax.png /app/build/logo.png
+COPY logobenemax.png /app/build/favicon.ico
+COPY logobenemax.png /app/build/apple-touch-icon.png
 COPY logobenemax.png /app/logo.png
 
-# ----- ESTRATÉGIA DE SUBSTITUIÇÃO DIRETA (BRUTE FORCE) -----
-# 1. Substitui 'Open WebUI' por 'BenemaxGPT' em todos os arquivos do frontend
-# 2. Injeta a fonte Poppins diretamente no index.html caso o CSS falhe
-RUN find /app/build -type f -exec sed -i 's/Open WebUI/BenemaxGPT/g' {} + && \
+# ----- ESTRATÉGIA DE SUBSTITUIÇÃO RADICAL -----
+# 1. Remove qualquer menção a "(Open WebUI)" ou "Open WebUI" de todos os arquivos
+# 2. Injeta a fonte e esconde o texto original via CSS no index.html
+RUN find /app/build -type f -exec sed -i 's/ (Open WebUI)//g' {} + && \
+    find /app/build -type f -exec sed -i 's/Open WebUI/BenemaxGPT/g' {} + && \
     find /app/build -type f -name "*.html" -exec sed -i 's#</head>#<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700\&display=swap" rel="stylesheet"><style>* { font-family: "Poppins", sans-serif !important; }</style></head>#' {} +
 
-# Forçamos as URLs
+# Forçamos as URLs e desativamos o sufixo via ENV se suportado
 ENV WEBUI_FAVICON_URL="/favicon.png"
 ENV WEBUI_LOGO_URL="/logo.png"
+ENV GLOBAL_TITLE_TEMPLATE="BenemaxGPT"
 
 # Configurações para otimizar o uso em CPU
 ENV OLLAMA_NUM_PARALLEL=1
