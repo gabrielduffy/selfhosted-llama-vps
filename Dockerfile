@@ -1,30 +1,32 @@
 # Usamos a imagem oficial que integra Ollama + Open WebUI
 FROM ghcr.io/open-webui/open-webui:ollama
 
-# Configurações de Branding e Estilo
+# Configurações de Branding
 ENV WEBUI_NAME="BenemaxGPT"
 ENV WEBUI_URL="https://llm.ax5glv.easypanel.host/"
 ENV WEBUI_SECRET_KEY="benemax_secret_key_change_me"
 ENV WEBUI_AUTH=True
 
-# Forçar a remoção do sufixo " (Open WebUI)" via variável interna
-ENV GLOBAL_TITLE_TEMPLATE="{{title}}"
-
-# Injeção de CSS e Fontes (Agressivo no nível de compilação)
+# Injeção de CSS Agressiva via Variável
 ENV CUSTOM_INTERFACE_CSS=" \
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap'); \
-    html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video { font-family: 'Poppins', sans-serif !important; } \
+    * { font-family: 'Poppins', sans-serif !important; } \
     :root { --primary: #8B2CE5 !important; --accent: #00A3FF !important; } \
     .bg-primary { background: linear-gradient(135deg, #8B2CE5 0%, #00A3FF 100%) !important; border: none !important; } \
     "
 
-# Copiamos a logo para locais redundantes para garantir reconhecimento
+# Copiamos a logo
 COPY logobenemax.png /app/build/favicon.png
 COPY logobenemax.png /app/build/logo.png
-COPY logobenemax.png /app/build/favicon.ico
-COPY logobenemax.png /app/build/static/logo.png
+COPY logobenemax.png /app/logo.png
 
-# Informamos as URLs para o sistema
+# ----- ESTRATÉGIA DE SUBSTITUIÇÃO DIRETA (BRUTE FORCE) -----
+# 1. Substitui 'Open WebUI' por 'BenemaxGPT' em todos os arquivos do frontend
+# 2. Injeta a fonte Poppins diretamente no index.html caso o CSS falhe
+RUN find /app/build -type f -exec sed -i 's/Open WebUI/BenemaxGPT/g' {} + && \
+    find /app/build -type f -name "*.html" -exec sed -i 's#</head>#<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700\&display=swap" rel="stylesheet"><style>* { font-family: "Poppins", sans-serif !important; }</style></head>#' {} +
+
+# Forçamos as URLs
 ENV WEBUI_FAVICON_URL="/favicon.png"
 ENV WEBUI_LOGO_URL="/logo.png"
 
