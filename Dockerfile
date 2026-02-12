@@ -7,31 +7,28 @@ ENV WEBUI_URL="https://llm.ax5glv.easypanel.host/"
 ENV WEBUI_SECRET_KEY="benemax_secret_key_change_me"
 ENV WEBUI_AUTH=True
 
-# Injeção de CSS Agressiva
+# Injeção de CSS Agressiva (Poppins em tudo e esconder sufixos)
 ENV CUSTOM_INTERFACE_CSS=" \
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap'); \
     * { font-family: 'Poppins', sans-serif !important; } \
     :root { --primary: #8B2CE5 !important; --accent: #00A3FF !important; } \
-    #side-panel-header, .app-title { font-size: 0 !important; } \
-    #side-panel-header::after, .app-title::after { content: 'BenemaxGPT' !important; font-size: 1rem !important; visibility: visible !important; } \
     "
 
-# Copiamos a logo para TUDO que for ícone no sistema
-COPY logobenemax.png /app/build/favicon.png
+# Copiamos a logo para a raiz do build
 COPY logobenemax.png /app/build/logo.png
-COPY logobenemax.png /app/build/favicon.ico
-COPY logobenemax.png /app/build/apple-touch-icon.png
-COPY logobenemax.png /app/logo.png
+COPY logobenemax.png /app/build/favicon.png
 
-# ----- ESTRATÉGIA DE SUBSTITUIÇÃO RADICAL -----
-# 1. Remove qualquer menção a "(Open WebUI)" ou "Open WebUI" de todos os arquivos
-# 2. Injeta a fonte e esconde o texto original via CSS no index.html
-RUN find /app/build -type f -exec sed -i 's/ (Open WebUI)//g' {} + && \
-    find /app/build -type f -exec sed -i 's/Open WebUI/BenemaxGPT/g' {} + && \
-    find /app/build -type f -name "*.html" -exec sed -i 's#</head>#<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700\&display=swap" rel="stylesheet"><style>* { font-family: "Poppins", sans-serif !important; }</style></head>#' {} +
+# ----- ESTRATÉGIA DE SUBSTITUIÇÃO TOTAL (OVERKILL) -----
+# 1. Localiza e substitui FISICAMENTE todos os arquivos de logo/favicon do sistema
+# 2. Varredura completa em /app para trocar textos em arquivos compilados
+RUN find /app -name "favicon.png" -exec cp /app/build/logo.png {} + && \
+    find /app -name "logo.png" -exec cp /app/build/logo.png {} + && \
+    find /app -name "favicon.ico" -exec cp /app/build/logo.png {} + && \
+    find /app -type f -exec sed -i 's/ (Open WebUI)//g' {} + && \
+    find /app -type f -exec sed -i 's/Open WebUI/BenemaxGPT/g' {} +
 
-# Forçamos as URLs e desativamos o sufixo via ENV se suportado
-ENV WEBUI_FAVICON_URL="/favicon.png"
+# Forçamos as variáveis de sistema
+ENV WEBUI_FAVICON_URL="/logo.png"
 ENV WEBUI_LOGO_URL="/logo.png"
 ENV GLOBAL_TITLE_TEMPLATE="BenemaxGPT"
 
