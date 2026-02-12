@@ -98,24 +98,57 @@ ENV CUSTOM_INTERFACE_CSS=" \
 # Copiamos a logo de referência
 COPY logobenemax.png /app/logobenemax_source.png
 
-# ----- ESTRATÉGIA RADICAL DE REBRANDING (V4) -----
-# 1. Substitui fisicamente TODOS os ícones
+# ----- ESTRATÉGIA RADICAL DE REBRANDING (V5 - PREMIUM AUTH & PRELOADER) -----
+
+# 1. Substitui o Preloader e Logos Físicas
 RUN find /app -name "favicon*" -exec cp /app/logobenemax_source.png {} \; && \
     find /app -name "logo*" -exec cp /app/logobenemax_source.png {} \; && \
     find /app -name "apple-touch-icon*" -exec cp /app/logobenemax_source.png {} \;
 
-# 2. Limpeza total de textos (Removendo o sufixo chato)
-# Procuramos por variações: " (Open WebUI)", "(Open WebUI)", "Open WebUI"
+# 2. Limpeza total de textos
 RUN find /app -type f -exec sed -i 's/ (Open WebUI)//g' {} + && \
-    find /app -type f -exec sed -i 's/(Open WebUI)//g' {} + && \
-    find /app -type f -exec sed -i 's/Open WebUI/BenemaxGPT/g' {} + && \
-    find /app -type f -name "index.html" -exec sed -i 's#</head>#<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700\&display=swap" rel="stylesheet"><style>* { font-family: "Poppins", sans-serif !important; }</style></head>#' {} +
+    find /app -type f -exec sed -i 's/Open WebUI/BenemaxGPT/g' {} +
+
+# 3. Injeção Direta de CSS no index.html (Para Login e Preloader)
+# Isso garante que o estilo funcione ANTES do Javascript carregar a interface.
+RUN find /app/build -name "index.html" -exec sed -i 's#</head>#<style> \
+    @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700\&display=swap"); \
+    * { font-family: "Poppins", sans-serif !important; } \
+    body { background: #050508 !important; color: white !important; } \
+    /* Customização do Preloader */ \
+    #logo-container, .loading-screen, #splash-screen { background: #050508 !important; } \
+    #logo-container svg, .loading-screen svg { display: none !important; } \
+    #logo-container::after, .loading-screen::after { \
+    content: "" !important; display: block !important; width: 120px !important; height: 120px !important; \
+    background: url("/logo.png") no-repeat center !important; background-size: contain !important; \
+    margin: auto !important; position: absolute !important; top:0; bottom:0; left:0; right:0 !important; \
+    filter: drop-shadow(0 0 15px rgba(139, 44, 229, 0.6)) !important; \
+    } \
+    /* Card de Login */ \
+    .w-full.max-w-md, [class*="auth-card"] { \
+    background: rgba(255, 255, 255, 0.03) !important; \
+    backdrop-filter: blur(20px) !important; \
+    border: 1px solid rgba(255, 255, 255, 0.1) !important; \
+    border-radius: 24px !important; \
+    } \
+    button[type="submit"], .bg-primary { \
+    background: linear-gradient(135deg, #8B2CE5 0%, #00A3FF 100%) !important; \
+    box-shadow: 0 0 20px rgba(139, 44, 229, 0.4) !important; border: none !important; \
+    } \
+    .text-2xl.font-medium::before { \
+    content: "" !important; display: block !important; width: 80px !important; height: 80px !important; \
+    background: url("/logo.png") no-repeat center !important; background-size: contain !important; \
+    margin: 0 auto 20px !important; \
+    } \
+    </style></head>#' {} +
 
 # Forçamos variáveis finais
 ENV WEBUI_NAME="BenemaxGPT"
 ENV WEBUI_FAVICON_URL="/favicon.png"
 ENV WEBUI_LOGO_URL="/logo.png"
 ENV GLOBAL_TITLE_TEMPLATE="BenemaxGPT"
+ENV ENABLE_SIGNUP=True
+ENV DEFAULT_USER_ROLE="user"
 
 # Expor as portas necessárias
 EXPOSE 8080
