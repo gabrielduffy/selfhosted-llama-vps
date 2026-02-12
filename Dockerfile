@@ -5,6 +5,7 @@ FROM ghcr.io/open-webui/open-webui:ollama
 ENV WEBUI_NAME="Benemax AI"
 ENV WEBUI_URL="https://llm.ax5glv.easypanel.host/"
 ENV WEBUI_SECRET_KEY="benemax_secret_key_change_me"
+ENV WEBUI_AUTH=False
 
 # Configurações para otimizar o uso em CPU
 ENV OLLAMA_NUM_PARALLEL=1
