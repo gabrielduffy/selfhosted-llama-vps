@@ -98,18 +98,19 @@ ENV CUSTOM_INTERFACE_CSS=" \
 # Copiamos a logo de referência
 COPY logobenemax.png /app/logobenemax_source.png
 
-# ----- ESTRATÉGIA RADICAL DE REBRANDING (V7 - ULTIMATE) -----
+# ----- ESTRATÉGIA RADICAL DE REBRANDING (V8 - FRONTEND FIX) -----
 
-# 1. Preparação das Imagens e Pastas
-RUN mkdir -p /app/backend/open_webui/static
+# 1. Preparação das Pastas e Logos no local correto do Frontend
+RUN mkdir -p /app/build/static
+COPY logobenemax.png /app/build/logo.png
+COPY logobenemax.png /app/build/favicon.png
 COPY logobenemax.png /app/backend/open_webui/static/logo.png
-COPY logobenemax.png /app/backend/open_webui/static/favicon.png
 
-# 2. Criação do arquivo CSS mestre (evita erros de sed com caracteres especiais)
+# 2. Criação do arquivo CSS mestre no local de build do site
 RUN echo " \
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap'); \
     * { font-family: 'Poppins', sans-serif !important; } \
-    body { background: #050508 !important; color: white !important; margin: 0; } \
+    body { background: #050508 !important; color: white !important; margin: 0; overflow-x: hidden; } \
     #logo-container, .loading-screen, #splash-screen { background: #050508 !important; display: flex !important; justify-content: center !important; align-items: center !important; } \
     #logo-container svg, .loading-screen svg { display: none !important; } \
     #logo-container::after, .loading-screen::after { \
@@ -119,28 +120,43 @@ RUN echo " \
     animation: pulse 2s infinite; \
     } \
     @keyframes pulse { 0% { opacity: 0.6; transform: scale(0.95); } 50% { opacity: 1; transform: scale(1); } 100% { opacity: 0.6; transform: scale(0.95); } } \
-    .w-full.max-w-md, [class*='auth-card'] { \
-    background: rgba(255, 255, 255, 0.03) !important; \
-    backdrop-filter: blur(25px) !important; \
-    border: 1px solid rgba(255, 255, 255, 0.1) !important; \
-    border-radius: 28px !important; \
-    padding: 2rem !important; \
+    /* Card de Login Glassmorphism */ \
+    .w-full.max-w-md, [class*='auth-card'], .bg-gray-50, .bg-white { \
+    background: rgba(255, 255, 255, 0.02) !important; \
+    backdrop-filter: blur(35px) !important; \
+    border: 1px solid rgba(255, 255, 255, 0.08) !important; \
+    border-radius: 30px !important; \
+    padding: 2.5rem !important; \
+    color: white !important; \
     } \
     button[type='submit'], .bg-primary { \
     background: linear-gradient(135deg, #8B2CE5 0%, #00A3FF 100%) !important; \
-    border: none !important; box-shadow: 0 0 20px rgba(139, 44, 229, 0.4) !important; \
+    border: none !important; box-shadow: 0 0 25px rgba(139, 44, 229, 0.4) !important; \
+    border-radius: 12px !important; font-weight: 600 !important; \
     } \
     .text-2xl.font-medium::before { \
-    content: ''; display: block; width: 80px; height: 80px; \
+    content: ''; display: block; width: 90px; height: 90px; \
     background: url('/logo.png') no-repeat center; background-size: contain; \
-    margin: 0 auto 20px; \
+    margin: 0 auto 30px; \
     } \
-    " > /app/backend/open_webui/static/benemax.css
+    /* Estilizando o link de Cadastro para parecer uma aba ou botão de destaque */ \
+    a[href*='/auth/signup'], .text-primary-600 { \
+    color: #00A3FF !important; \
+    font-weight: 700 !important; \
+    border: 1px solid rgba(0, 163, 255, 0.3); \
+    padding: 5px 15px; border-radius: 20px; \
+    transition: all 0.3s ease; \
+    } \
+    a[href*='/auth/signup']:hover { \
+    background: rgba(0, 163, 255, 0.1); \
+    border-color: #00A3FF; \
+    } \
+    " > /app/build/benemax.css
 
-# 3. Injeção RADICAL em todos os arquivos de entrada
-RUN find /app -name "index.html" -exec sed -i 's|</head>|<link rel="stylesheet" href="/benemax.css"></head>|' {} + && \
-    find /app -name "favicon*" -exec cp /app/backend/open_webui/static/logo.png {} \; && \
-    find /app -name "logo*" -exec cp /app/backend/open_webui/static/logo.png {} \; && \
+# 3. Injeção direta no index.html do FRONTEND
+RUN sed -i 's|</head>|<link rel="stylesheet" href="/benemax.css"></head>|' /app/build/index.html && \
+    find /app -name "favicon*" -exec cp /app/build/logo.png {} \; && \
+    find /app -name "logo*" -exec cp /app/build/logo.png {} \; && \
     find /app -type f -exec sed -i 's/Open WebUI/BenemaxGPT/g' {} + && \
     find /app -type f -exec sed -i 's/ (Open WebUI)//g' {} +
 
