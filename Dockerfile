@@ -3,7 +3,7 @@ FROM ghcr.io/open-webui/open-webui:ollama
 
 # Configurações de Branding e Persistência
 ENV WEBUI_NAME="BenemaxGPT"
-ENV WEBUI_URL="https://llm.ax5glv.easypanel.host/"
+ENV WEBUI_URL="https://gpt.benemax.com.br/"
 ENV WEBUI_SECRET_KEY="benemax_secret_key_change_me"
 ENV WEBUI_AUTH=True
 
@@ -146,7 +146,7 @@ RUN find /app -name "index.html" -exec sed -i 's|</head>|<link rel="stylesheet" 
 
 # 4. Configurações de Ambiente Final
 ENV WEBUI_NAME="BenemaxGPT"
-ENV WEBUI_URL="https://llm.ax5glv.easypanel.host/"
+ENV WEBUI_URL="https://gpt.benemax.com.br/"
 ENV WEBUI_SECRET_KEY="benemax_secret_key_change_me"
 ENV WEBUI_AUTH=True
 ENV ENABLE_SIGNUP=True
