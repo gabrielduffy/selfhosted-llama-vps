@@ -18,29 +18,29 @@ ENV CUSTOM_INTERFACE_CSS=" \
 COPY logobenemax.png /app/build/logo.png
 COPY logobenemax.png /app/build/favicon.png
 
-# ----- ESTRATÉGIA DE SUBSTITUIÇÃO TOTAL (OVERKILL) -----
-# 1. Localiza e substitui FISICAMENTE todos os arquivos de logo/favicon do sistema
-# 2. Varredura completa em /app para trocar textos em arquivos compilados
-RUN find /app -name "favicon.png" -exec cp /app/build/logo.png {} + && \
-    find /app -name "logo.png" -exec cp /app/build/logo.png {} + && \
-    find /app -name "favicon.ico" -exec cp /app/build/logo.png {} + && \
-    find /app -type f -exec sed -i 's/ (Open WebUI)//g' {} + && \
-    find /app -type f -exec sed -i 's/Open WebUI/BenemaxGPT/g' {} +
+# ----- ESTRATÉGIA DE SUBSTITUIÇÃO TOTAL -----
+# 1. Copiamos a logo
+COPY logobenemax.png /app/build/logo.png
+COPY logobenemax.png /app/build/favicon.png
+
+# 2. Varredura completa para trocar textos e garantir a logo
+RUN find /app/build -type f -exec sed -i 's/ (Open WebUI)//g' {} + && \
+    find /app/build -type f -exec sed -i 's/Open WebUI/BenemaxGPT/g' {} + && \
+    cp /app/build/logo.png /app/build/favicon.ico
 
 # Forçamos as variáveis de sistema
 ENV WEBUI_FAVICON_URL="/logo.png"
 ENV WEBUI_LOGO_URL="/logo.png"
 ENV GLOBAL_TITLE_TEMPLATE="BenemaxGPT"
 
-# Configurações para otimizar o uso em CPU
+# Configurações para otimizar o uso em CPU e Persistência de Modelos
+ENV OLLAMA_MODELS="/app/backend/data/ollama/models"
 ENV OLLAMA_NUM_PARALLEL=1
 ENV OLLAMA_MAX_LOADED_MODELS=1
 ENV OLLAMA_INTEL_GPU=false
 ENV OLLAMA_AMD_GPU=false
 
 # Expor as portas necessárias
-# 8080: Open WebUI (Interface)
-# 11434: Ollama API
 EXPOSE 8080
 EXPOSE 11434
 
