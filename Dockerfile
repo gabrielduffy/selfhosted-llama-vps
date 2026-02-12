@@ -2,15 +2,22 @@
 FROM ghcr.io/open-webui/open-webui:ollama
 
 # Configurações de Branding e Estilo
-ENV WEBUI_NAME="Benemax AI"
+ENV WEBUI_NAME="BenemaxGPT"
 ENV WEBUI_URL="https://llm.ax5glv.easypanel.host/"
 ENV WEBUI_SECRET_KEY="benemax_secret_key_change_me"
+ENV WEBUI_AUTH=True
 
-# FORÇAR ACESSO PÚBLICO (Ignorar erros de usuários existentes)
-ENV WEBUI_AUTH=False
-ENV ENABLE_SIGNUP=True
-ENV DEFAULT_USER_ROLE="admin"
-ENV SHOW_ADMIN_DETAILS=False
+# Injeção de CSS para Fonte Poppins e Cores
+ENV CUSTOM_INTERFACE_CSS=" \
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap'); \
+    body, html { font-family: 'Poppins', sans-serif !important; } \
+    :root { --primary: #8B2CE5 !important; --accent: #00A3FF !important; } \
+    .bg-primary { background: linear-gradient(135deg, #8B2CE5 0%, #00A3FF 100%) !important; border: none !important; } \
+    "
+
+# Copiamos a logo para o container
+COPY logobenemax.png /app/build/favicon.png
+COPY logobenemax.png /app/build/logo.png
 
 # Configurações para otimizar o uso em CPU
 ENV OLLAMA_NUM_PARALLEL=1
