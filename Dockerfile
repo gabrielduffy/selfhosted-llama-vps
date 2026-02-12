@@ -14,11 +14,85 @@ ENV OLLAMA_MAX_LOADED_MODELS=1
 ENV OLLAMA_INTEL_GPU=false
 ENV OLLAMA_AMD_GPU=false
 
-# Injeção de CSS Agressiva (Poppins em tudo)
+# Injeção de CSS Agressiva (Poppins, Branding e Auth Page Premium)
 ENV CUSTOM_INTERFACE_CSS=" \
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap'); \
+    \
+    /* Reset e Fonte */ \
     * { font-family: 'Poppins', sans-serif !important; } \
-    :root { --primary: #8B2CE5 !important; --accent: #00A3FF !important; } \
+    \
+    /* Tema Escuro e Background Neon */ \
+    body { \
+    background-color: #050508 !important; \
+    background-image:  \
+    radial-gradient(at 0% 0%, rgba(139, 44, 229, 0.15) 0px, transparent 50%), \
+    radial-gradient(at 100% 100%, rgba(0, 163, 255, 0.15) 0px, transparent 50%) !important; \
+    height: 100vh !important; \
+    color: white !important; \
+    } \
+    \
+    /* Card de Login (Glassmorphism) */ \
+    div.flex.flex-col.justify-center.min-h-screen { \
+    background: transparent !important; \
+    } \
+    \
+    .w-full.max-w-md { \
+    background: rgba(255, 255, 255, 0.03) !important; \
+    backdrop-filter: blur(16px) !important; \
+    border: 1px solid rgba(255, 255, 255, 0.1) !important; \
+    border-radius: 24px !important; \
+    padding: 40px !important; \
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important; \
+    } \
+    \
+    /* Injeção da Logomarca Benemax acima do título */ \
+    .text-2xl.font-medium::before { \
+    content: '' !important; \
+    display: block !important; \
+    width: 100px !important; \
+    height: 100px !important; \
+    background: url('/logo.png') no-repeat center !important; \
+    background-size: contain !important; \
+    margin: 0 auto 30px !important; \
+    filter: drop-shadow(0 0 10px rgba(139, 44, 229, 0.5)) !important; \
+    } \
+    \
+    .text-2xl.font-medium { \
+    text-align: center !important; \
+    font-size: 1.8rem !important; \
+    font-weight: 700 !important; \
+    margin-bottom: 30px !important; \
+    background: linear-gradient(135deg, #fff 0%, #ccc 100%); \
+    -webkit-background-clip: text; \
+    -webkit-text-fill-color: transparent; \
+    } \
+    \
+    /* Inputs Estilizados */ \
+    input { \
+    background: rgba(255, 255, 255, 0.05) !important; \
+    border: 1px solid rgba(255, 255, 255, 0.1) !important; \
+    border-radius: 12px !important; \
+    color: white !important; \
+    padding: 12px !important; \
+    } \
+    \
+    /* Botão Benemax (Gradiente + Neon) */ \
+    button[type='submit'], .bg-primary { \
+    background: linear-gradient(135deg, #8B2CE5 0%, #00A3FF 100%) !important; \
+    border: none !important; \
+    border-radius: 12px !important; \
+    font-weight: 700 !important; \
+    text-transform: uppercase !important; \
+    letter-spacing: 1px !important; \
+    box-shadow: 0 4px 15px rgba(139, 44, 229, 0.4) !important; \
+    transition: all 0.3s ease !important; \
+    cursor: pointer !important; \
+    } \
+    \
+    button[type='submit']:hover { \
+    transform: translateY(-2px) !important; \
+    box-shadow: 0 8px 25px rgba(0, 163, 255, 0.6) !important; \
+    } \
     "
 
 # Copiamos a logo de referência
