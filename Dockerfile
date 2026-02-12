@@ -110,37 +110,48 @@ RUN find /app -type f -exec sed -i 's/ (Open WebUI)//g' {} + && \
     find /app -type f -exec sed -i 's/Open WebUI/BenemaxGPT/g' {} +
 
 # 3. Injeção Direta de CSS no index.html (Para Login e Preloader)
-# Isso garante que o estilo funcione ANTES do Javascript carregar a interface.
-RUN find /app/build -name "index.html" -exec sed -i 's#</head>#<style> \
+# Usamos '|' como delimitador no sed para evitar conflito com o '#' das cores CSS.
+RUN find /app/build -name "index.html" -exec sed -i 's|</head>|<style> \
     @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700\&display=swap"); \
     * { font-family: "Poppins", sans-serif !important; } \
     body { background: #050508 !important; color: white !important; } \
-    /* Customização do Preloader */ \
-    #logo-container, .loading-screen, #splash-screen { background: #050508 !important; } \
-    #logo-container svg, .loading-screen svg { display: none !important; } \
-    #logo-container::after, .loading-screen::after { \
-    content: "" !important; display: block !important; width: 120px !important; height: 120px !important; \
-    background: url("/logo.png") no-repeat center !important; background-size: contain !important; \
-    margin: auto !important; position: absolute !important; top:0; bottom:0; left:0; right:0 !important; \
-    filter: drop-shadow(0 0 15px rgba(139, 44, 229, 0.6)) !important; \
+    /* Customização do Preloader (Splash Screen) */ \
+    #logo-container, .loading-screen, #splash-screen, .splash-screen { \
+    background: #050508 !important; \
+    display: flex !important; justify-content: center !important; align-items: center !important; \
     } \
-    /* Card de Login */ \
+    #logo-container svg, .loading-screen svg, #splash-screen svg, .splash-screen svg, \
+    #logo-container img, .loading-screen img, #splash-screen img, .splash-screen img, \
+    [class*="loading-text"], [id*="loading-text"] { \
+    display: none !important; \
+    } \
+    #logo-container::after, .loading-screen::after, #splash-screen::after, .splash-screen::after { \
+    content: "" !important; display: block !important; \
+    width: 150px !important; height: 150px !important; \
+    background: url("/logo.png") no-repeat center !important; \
+    background-size: contain !important; \
+    filter: drop-shadow(0 0 20px rgba(139, 44, 229, 0.7)) !important; \
+    animation: pulse 2s infinite !important; \
+    } \
+    @keyframes pulse { 0% { opacity: 0.6; transform: scale(0.95); } 50% { opacity: 1; transform: scale(1); } 100% { opacity: 0.6; transform: scale(0.95); } } \
+    /* Card de Login Premium */ \
     .w-full.max-w-md, [class*="auth-card"] { \
     background: rgba(255, 255, 255, 0.03) !important; \
-    backdrop-filter: blur(20px) !important; \
+    backdrop-filter: blur(25px) !important; \
     border: 1px solid rgba(255, 255, 255, 0.1) !important; \
-    border-radius: 24px !important; \
+    border-radius: 28px !important; \
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6) !important; \
     } \
     button[type="submit"], .bg-primary { \
     background: linear-gradient(135deg, #8B2CE5 0%, #00A3FF 100%) !important; \
-    box-shadow: 0 0 20px rgba(139, 44, 229, 0.4) !important; border: none !important; \
+    border: none !important; box-shadow: 0 0 20px rgba(139, 44, 229, 0.5) !important; \
     } \
     .text-2xl.font-medium::before { \
-    content: "" !important; display: block !important; width: 80px !important; height: 80px !important; \
+    content: "" !important; display: block !important; width: 90px !important; height: 90px !important; \
     background: url("/logo.png") no-repeat center !important; background-size: contain !important; \
     margin: 0 auto 20px !important; \
     } \
-    </style></head>#' {} +
+    </style></head>|' {} +
 
 # Forçamos variáveis finais
 ENV WEBUI_NAME="BenemaxGPT"
