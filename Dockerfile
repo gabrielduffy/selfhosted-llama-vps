@@ -24,18 +24,21 @@ ENV CUSTOM_INTERFACE_CSS=" \
 # Copiamos a logo de referência
 COPY logobenemax.png /app/logobenemax_source.png
 
-# ----- ESTRATÉGIA RADICAL DE REBRANDING -----
-# 1. Substitui fisicamente TODOS os ícones do sistema pela nossa logo
-# 2. Varredura TOTAL em /app para apagar "Open WebUI" e o sufixo
-# 3. Força a fonte Poppins no HTML e remove o título original
+# ----- ESTRATÉGIA RADICAL DE REBRANDING (V4) -----
+# 1. Substitui fisicamente TODOS os ícones
 RUN find /app -name "favicon*" -exec cp /app/logobenemax_source.png {} \; && \
     find /app -name "logo*" -exec cp /app/logobenemax_source.png {} \; && \
-    find /app -name "apple-touch-icon*" -exec cp /app/logobenemax_source.png {} \; && \
-    find /app -type f \( -name "*.html" -o -name "*.js" -o -name "*.json" -o -name "*.css" \) -exec sed -i 's/ (Open WebUI)//g' {} + && \
-    find /app -type f \( -name "*.html" -o -name "*.js" -o -name "*.json" \) -exec sed -i 's/Open WebUI/BenemaxGPT/g' {} + && \
+    find /app -name "apple-touch-icon*" -exec cp /app/logobenemax_source.png {} \;
+
+# 2. Limpeza total de textos (Removendo o sufixo chato)
+# Procuramos por variações: " (Open WebUI)", "(Open WebUI)", "Open WebUI"
+RUN find /app -type f -exec sed -i 's/ (Open WebUI)//g' {} + && \
+    find /app -type f -exec sed -i 's/(Open WebUI)//g' {} + && \
+    find /app -type f -exec sed -i 's/Open WebUI/BenemaxGPT/g' {} + && \
     find /app -type f -name "index.html" -exec sed -i 's#</head>#<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700\&display=swap" rel="stylesheet"><style>* { font-family: "Poppins", sans-serif !important; }</style></head>#' {} +
 
 # Forçamos variáveis finais
+ENV WEBUI_NAME="BenemaxGPT"
 ENV WEBUI_FAVICON_URL="/favicon.png"
 ENV WEBUI_LOGO_URL="/logo.png"
 ENV GLOBAL_TITLE_TEMPLATE="BenemaxGPT"
