@@ -98,68 +98,62 @@ ENV CUSTOM_INTERFACE_CSS=" \
 # Copiamos a logo de referência
 COPY logobenemax.png /app/logobenemax_source.png
 
-# ----- ESTRATÉGIA RADICAL DE REBRANDING (V5 - PREMIUM AUTH & PRELOADER) -----
+# ----- ESTRATÉGIA RADICAL DE REBRANDING (V7 - ULTIMATE) -----
 
-# 1. Substitui o Preloader e Logos Físicas
-RUN find /app -name "favicon*" -exec cp /app/logobenemax_source.png {} \; && \
-    find /app -name "logo*" -exec cp /app/logobenemax_source.png {} \; && \
-    find /app -name "apple-touch-icon*" -exec cp /app/logobenemax_source.png {} \;
+# 1. Preparação das Imagens e Pastas
+RUN mkdir -p /app/backend/open_webui/static
+COPY logobenemax.png /app/backend/open_webui/static/logo.png
+COPY logobenemax.png /app/backend/open_webui/static/favicon.png
 
-# 2. Limpeza total de textos
-RUN find /app -type f -exec sed -i 's/ (Open WebUI)//g' {} + && \
-    find /app -type f -exec sed -i 's/Open WebUI/BenemaxGPT/g' {} +
-
-# 3. Injeção Direta de CSS no index.html (Para Login e Preloader)
-# Usamos '|' como delimitador no sed para evitar conflito com o '#' das cores CSS.
-RUN find /app/build -name "index.html" -exec sed -i 's|</head>|<style> \
-    @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700\&display=swap"); \
-    * { font-family: "Poppins", sans-serif !important; } \
-    body { background: #050508 !important; color: white !important; } \
-    /* Customização do Preloader (Splash Screen) */ \
-    #logo-container, .loading-screen, #splash-screen, .splash-screen { \
-    background: #050508 !important; \
-    display: flex !important; justify-content: center !important; align-items: center !important; \
-    } \
-    #logo-container svg, .loading-screen svg, #splash-screen svg, .splash-screen svg, \
-    #logo-container img, .loading-screen img, #splash-screen img, .splash-screen img, \
-    [class*="loading-text"], [id*="loading-text"] { \
-    display: none !important; \
-    } \
-    #logo-container::after, .loading-screen::after, #splash-screen::after, .splash-screen::after { \
-    content: "" !important; display: block !important; \
-    width: 150px !important; height: 150px !important; \
-    background: url("/logo.png") no-repeat center !important; \
-    background-size: contain !important; \
-    filter: drop-shadow(0 0 20px rgba(139, 44, 229, 0.7)) !important; \
-    animation: pulse 2s infinite !important; \
+# 2. Criação do arquivo CSS mestre (evita erros de sed com caracteres especiais)
+RUN echo " \
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap'); \
+    * { font-family: 'Poppins', sans-serif !important; } \
+    body { background: #050508 !important; color: white !important; margin: 0; } \
+    #logo-container, .loading-screen, #splash-screen { background: #050508 !important; display: flex !important; justify-content: center !important; align-items: center !important; } \
+    #logo-container svg, .loading-screen svg { display: none !important; } \
+    #logo-container::after, .loading-screen::after { \
+    content: ''; display: block; width: 120px; height: 120px; \
+    background: url('/logo.png') no-repeat center; background-size: contain; \
+    filter: drop-shadow(0 0 15px rgba(139, 44, 229, 0.6)); \
+    animation: pulse 2s infinite; \
     } \
     @keyframes pulse { 0% { opacity: 0.6; transform: scale(0.95); } 50% { opacity: 1; transform: scale(1); } 100% { opacity: 0.6; transform: scale(0.95); } } \
-    /* Card de Login Premium */ \
-    .w-full.max-w-md, [class*="auth-card"] { \
+    .w-full.max-w-md, [class*='auth-card'] { \
     background: rgba(255, 255, 255, 0.03) !important; \
     backdrop-filter: blur(25px) !important; \
     border: 1px solid rgba(255, 255, 255, 0.1) !important; \
     border-radius: 28px !important; \
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6) !important; \
+    padding: 2rem !important; \
     } \
-    button[type="submit"], .bg-primary { \
+    button[type='submit'], .bg-primary { \
     background: linear-gradient(135deg, #8B2CE5 0%, #00A3FF 100%) !important; \
-    border: none !important; box-shadow: 0 0 20px rgba(139, 44, 229, 0.5) !important; \
+    border: none !important; box-shadow: 0 0 20px rgba(139, 44, 229, 0.4) !important; \
     } \
     .text-2xl.font-medium::before { \
-    content: "" !important; display: block !important; width: 90px !important; height: 90px !important; \
-    background: url("/logo.png") no-repeat center !important; background-size: contain !important; \
-    margin: 0 auto 20px !important; \
+    content: ''; display: block; width: 80px; height: 80px; \
+    background: url('/logo.png') no-repeat center; background-size: contain; \
+    margin: 0 auto 20px; \
     } \
-    </style></head>|' {} +
+    " > /app/backend/open_webui/static/benemax.css
 
-# Forçamos variáveis finais
+# 3. Injeção RADICAL em todos os arquivos de entrada
+RUN find /app -name "index.html" -exec sed -i 's|</head>|<link rel="stylesheet" href="/benemax.css"></head>|' {} + && \
+    find /app -name "favicon*" -exec cp /app/backend/open_webui/static/logo.png {} \; && \
+    find /app -name "logo*" -exec cp /app/backend/open_webui/static/logo.png {} \; && \
+    find /app -type f -exec sed -i 's/Open WebUI/BenemaxGPT/g' {} + && \
+    find /app -type f -exec sed -i 's/ (Open WebUI)//g' {} +
+
+# 4. Configurações de Ambiente Final
 ENV WEBUI_NAME="BenemaxGPT"
+ENV WEBUI_URL="https://llm.ax5glv.easypanel.host/"
+ENV WEBUI_SECRET_KEY="benemax_secret_key_change_me"
+ENV WEBUI_AUTH=True
+ENV ENABLE_SIGNUP=True
+ENV DEFAULT_USER_ROLE="user"
 ENV WEBUI_FAVICON_URL="/favicon.png"
 ENV WEBUI_LOGO_URL="/logo.png"
 ENV GLOBAL_TITLE_TEMPLATE="BenemaxGPT"
-ENV ENABLE_SIGNUP=True
-ENV DEFAULT_USER_ROLE="user"
 
 # Expor as portas necessárias
 EXPOSE 8080
